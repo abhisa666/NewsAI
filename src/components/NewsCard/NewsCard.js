@@ -1,22 +1,56 @@
-import React from 'react';
-import {
-    Card, CardImg, CardText, CardBody,
-    CardTitle, CardSubtitle, Button
-  } from 'reactstrap';
+import React, {useState,useEffect,createRef} from 'react';
+import { Card, CardActions, CardActionArea, CardContent, CardMedia,
+   Button, Typography } from '@material-ui/core';
+
+import ClassNames from 'classnames';
+
+import useStyles from './styles';
+
+function NewsCard({article,i,activeArticle}){
+
+  const classes = useStyles();
+
+  const [elRefs, setElRefs] = useState([]);
+  const scrollToRef = (ref) => window.scroll(0, ref.current.offsetTop - 50);
+
+  useEffect(() => {
+    window.scroll(0, 0);
+
+    setElRefs((refs) => Array(20).fill().map((_, j) => refs[j] || createRef()));
+  }, []);
+
+  useEffect(() => {
+    if (i === activeArticle && elRefs[activeArticle]) {
+        scrollToRef(elRefs[activeArticle]);
+      }
+    }, [i, activeArticle, elRefs]);
 
 
-function NewsCard({article}){
     return(
-        <div>
-      <Card>
-        <CardImg top width="50%" src={article.urlToImage} alt="Card image cap" />
-        <CardBody>
-          <CardTitle>{article.title}</CardTitle>
-          <CardSubtitle>{article.author}</CardSubtitle>
-          <CardText>{article.description}</CardText>
-        </CardBody>
-      </Card>
-    </div>
+       <Card ref={elRefs[i]} className={ClassNames(classes.card , activeArticle===i ? classes.activeCard : null)}>
+
+         <CardActionArea href={article.url} target="_blank" >
+           <CardMedia className={classes.media} image={article.urlToImage || 'https://www.industry.gov.au/sites/default/files/August%202018/image/news-placeholder-738.png'} title={article.title} />
+           <div className={classes.details}>
+             <Typography variant="body2" color="textSecondary" component="h2" >{(new Date(article.publishedAt)).toDateString()}</Typography>
+             <Typography variant="body2" color="textSecondary" component="h2" >{article.source.name}</Typography>
+           </div>
+
+           <Typography className={classes.title} gutterBottom variant="body1">{article.title}</Typography>
+
+           <CardContent>
+            <Typography variant="body2" color="textSecondary" component="p" >{article.description}</Typography>
+           </CardContent>
+
+         </CardActionArea>
+
+         <CardActions className={classes.cardActions}>
+           <Button size="small" color="primary">Learn More</Button>
+           <Typography variant="h5" color="textSecondary">{i + 1}</Typography>
+         </CardActions>
+
+
+       </Card>
     );
 }
 
